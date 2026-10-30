@@ -22,6 +22,10 @@ The goal is to build a Python application that uses a free public API to solve a
 ## Team
 Students from universities in the United States and Germany.
 
+## GitHub Collaboration Guide
+
+For instructions on how to clone, commit, push, create branches, and collaborate using GitHub, check our [GitHub Collaboration Guide](GITHUB.md).
+
 ## Project Status
 In Development - Planning Phase
 
