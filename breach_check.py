@@ -8,7 +8,7 @@ from password import hash_and_split_password
 
 
 def check_password_once(password: bytearray) -> str:
-    """Return BREACHED, NOT_FOUND, or UNKNOWN without altering the input buffer."""
+    """Return BREACHED, NOT_FOUND, or UNKNOWN without altering the input buffer.""" # We should also agree on whether the check should return the breach count, in addition to the status (`BREACHED`, `NOT_FOUND`, or `UNKNOWN`).
     try:
         # Storage is delivered on the team's separate Ali modules branch.
         from storage import (
