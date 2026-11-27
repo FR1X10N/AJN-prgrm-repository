@@ -64,6 +64,7 @@ def display_generated_password(password):
 
 
 def main():
+    def main():
     process_security.refuse_if_elevated()
     process_security.disable_core_dumps()
 
@@ -80,27 +81,37 @@ def main():
             print("The password must be valid UTF-8. Please try again.")
             continue
 
-        if not validate_password_policy(password_text, policy):
-            password[:] = b"\x00" * len(password)
-            print(
-                "The password does not comply with the active policy. "
-                "Please try again."
-            )
-            continue
+        complies_with_policy = validate_password_policy(password_text, policy)
 
+        # Check for breaches regardless of policy compliance.
         result = verify_password(password)
         report_result(result)
 
-        if result == "BREACHED":
-            confirmation = input(
-                "Would you like to generate an unbreached password? [y/N] "
-            ).strip().lower()
+        if not complies_with_policy:
+            print("The password does not comply with the active policy.")
+
+        should_offer_generation = (
+            not complies_with_policy or result == "BREACHED"
+        )
+
+        if should_offer_generation:
+            if not complies_with_policy:
+                prompt = "Would you like to generate a new password? [y/N] "
+            else:
+                prompt = (
+                    "Would you like to generate an unbreached password? [y/N] "
+                )
+
+            confirmation = input(prompt).strip().lower()
 
             if confirmation in {"y", "yes"}:
                 generated_password = generate_unbreached_password(
                     policy,
                     check_password_once,
                 )
-                display_generated_password(generated_password)
 
+                if generated_password is None:
+                    print("Could not generate a verified password.")
+                else:
+                    display_generated_password(generated_password)
         break
