@@ -1,6 +1,0 @@
-{
-	"min_length": 12,
-	"max_length": 64,
-	"require_special": true,
-	"exclude_special": ["'", "\"", "\\"]
-}
