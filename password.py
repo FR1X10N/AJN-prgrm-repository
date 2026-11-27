@@ -33,17 +33,44 @@ def hash_and_split_password(password: bytearray) -> tuple[str, str]:
 def generate_password(policy: dict | None) -> bytearray: 
     """Generate a mutable candidate using the policy's length and exclusions."""
     length = 15
-    excluded = ()
-    if policy is not None:
-        if policy["require_special"]: # Please remove the abort for require_special: true. The function should support this policy instead of rejecting it as an unsupported rule.
-            raise SystemExit("Password policy requires an unsupported composition rule.") # When require_special is true, ensure the generated password contains at least one allowed special character. Merely including special characters in the character set does not guarantee this.
-        length = policy["min_length"] # Please respect max_length: choose a password length between min_length and max_length, inclusive, rather than always using min_length.
-        excluded = policy["exclude_special"] # Please apply exclude_special consistently: remove excluded punctuation from the character set and ensure none of those characters appear in the generated password.
+    excluded = set()
+    require_special = False
 
-    allowed = string.ascii_letters + string.digits
-    allowed += "".join(char for char in string.punctuation if char not in excluded)
-    alphabet = allowed.encode("ascii") # Please check that the character set is not empty before choosing characters from it. This should normally be true for a valid policy, but the check helps avoid errors if the input changes or the function is called separately.
-    return bytearray(secrets.choice(alphabet) for _ in range(length))
+    if policy is not None:
+        length = secrets.randbelow(
+            policy["max_length"] - policy["min_length"] + 1
+        ) + policy["min_length"]
+        excluded = set(policy["exclude_special"])
+        require_special = policy["require_special"]
+
+    letters_and_digits = string.ascii_letters + string.digits
+    allowed_specials = "".join(
+        char for char in string.punctuation if char not in excluded
+    )
+    allowed = letters_and_digits + allowed_specials
+
+    if not allowed:
+        raise ValueError("The password character set must not be empty.")
+
+    if require_special:
+        if not allowed_specials:
+            raise ValueError(
+                "The policy requires a special character, but none are allowed."
+            )
+
+        # Choose one required special character, then fill the remaining
+        # positions from the full allowed alphabet.
+        characters = [secrets.choice(allowed_specials)]
+        characters.extend(
+            secrets.choice(allowed) for _ in range(length - 1)
+        )
+        secrets.SystemRandom().shuffle(characters)
+    else:
+        characters = [
+            secrets.choice(allowed) for _ in range(length)
+        ]
+
+    return bytearray("".join(characters), "ascii")
 
 
 def generate_unbreached_password(
