@@ -1,6 +1,7 @@
 """Unit tests for Nolan's password and HIBP modules."""
 
 import getpass
+import string
 import http.client
 import sys
 import unittest
@@ -44,12 +45,18 @@ class PasswordTests(unittest.TestCase):
                   "require_special": False, "exclude_special": ["!"]}
         with patch("password.secrets.choice", side_effect=lambda alphabet: alphabet[-1]) as choice:
             self.assertEqual(len(password.generate_password(None)), 15)
-            self.assertIn(ord("!"), choice.call_args.args[0])
+            self.assertIn("!", choice.call_args.args[0])
             self.assertEqual(len(password.generate_password(policy)), 12)
-            self.assertNotIn(ord("!"), choice.call_args.args[0])
+            self.assertNotIn("!", choice.call_args.args[0])
 
-        with self.assertRaisesRegex(SystemExit, "composition"):
-            password.generate_password(dict(policy, require_special=True))
+        # require_special is supported: the result contains an allowed special
+        # character and never an excluded one.
+        special_policy = dict(policy, require_special=True)
+        for _ in range(50):
+            candidate = password.generate_password(special_policy).decode("ascii")
+            self.assertEqual(len(candidate), 12)
+            self.assertTrue(any(char in string.punctuation for char in candidate))
+            self.assertNotIn("!", candidate)
 
     def test_generation_stops_and_wipes_candidates(self):
         cases = (
