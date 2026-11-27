@@ -16,7 +16,8 @@ def load_policy(args):
     try:
         with policy_path.open("r", encoding="utf-8") as file:
             policy = json.load(file)
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError) as exc:
+        # ValueError covers JSONDecodeError and UnicodeDecodeError.
         raise SystemExit(f"Invalid policy file: {exc}")
 
     required_keys = {

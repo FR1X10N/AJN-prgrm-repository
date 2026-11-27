@@ -64,7 +64,6 @@ def display_generated_password(password):
 
 
 def main():
-    def main():
     process_security.refuse_if_elevated()
     process_security.disable_core_dumps()
 
