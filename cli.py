@@ -47,7 +47,10 @@ def report_result(result):
     messages = {
         "BREACHED": "This password was found in known data breaches.",
         "NOT_FOUND": "No breach was found for this password.",
-        "UNKNOWN": "The password could not be checked.",
+        "NETWORK_ERROR": "Network error: the API host could not be reached.",
+        "API_TIMEOUT": "The API request timed out.",
+        "API_ERROR": "The API returned an error or an invalid response.",
+        "CHECK_ERROR": "The password check failed because of a local error.",
     }
 
     print(messages.get(result, f"Unexpected result: {result}"))
